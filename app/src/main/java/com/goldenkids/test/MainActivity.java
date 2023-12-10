@@ -1,13 +1,17 @@
 package com.goldenkids.test;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.Manifest;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -139,13 +143,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
-
         //위치 권한 요청
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-//                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-//            return;
-//        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            return;
+        }
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//마지막 위치 받아오기
+        Location loc_Current = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
 
 
         // 마커 클릭 리스너 설정
@@ -155,27 +164,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        MarkerOptions markerOptions = new MarkerOptions();
 
         // API 호출 결과로 받은 좌표에 파란색 마커 추가
-        LatLng apiLatLng = new LatLng(36.715244, 127.439159);
+        LatLng apiLatLng = new LatLng(loc_Current.getLatitude(), loc_Current.getLongitude());
 
+        setmaker(loc_Current.getLatitude(),loc_Current.getLongitude(),"내 위치","");
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(apiLatLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(5.0f));
 
     }
 
     public void setmaker(double lat,double lang,String location,String cctvUrl){
         LatLng currentLatLng = new LatLng(lat,lang);
-        float hue = BitmapDescriptorFactory.HUE_BLUE;
 
-        // MarkerOptions를 사용하여 파란색 마커 추가
+
         MarkerOptions markerOptions = new MarkerOptions()
                 .position(currentLatLng)
                 .snippet(cctvUrl)
                 .title(location);
         if(location.equals("[중부선] 오창")){
-
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(hue));
+            // MarkerOptions를 사용하여 파란색 마커 추가
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+
+        } else if (location.equals("내 위치")) {
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
         }
 
