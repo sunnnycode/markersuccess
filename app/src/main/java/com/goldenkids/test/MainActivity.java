@@ -1,14 +1,11 @@
 package com.goldenkids.test;
 
-import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,11 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,21 +38,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.webkit.WebChromeClient;
 
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.MediaController;
-import android.widget.SimpleAdapter;
 import android.widget.VideoView;
-
-import org.json.JSONObject;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,View.OnClickListener {
@@ -67,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ApiService apiService;
     //    private Object BitmapDescriptorFactory;
     private String cctvUrl;
+    private Double myLocation[] = new Double[2];
     private static final String CHANNEL_ID = "test"; // 원하는 채널 ID로 변경
 
     //setMarker에서 홍수난 쪽에 list.add(new Double[]{lang,lat}); 으로 추가
@@ -150,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         adapter = new ListViewAdapter();
 
         for(String[] f : list){
-            adapter.addItem(f[0],f[1],f[2]);
+            adapter.addItem(f[0],f[1],f[2],f[3]);
         }
 
         listView.setAdapter(adapter);
@@ -162,18 +146,45 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         dialog.dismiss(); // 다이얼로그 닫기
                     }
                 });
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
-
-            }
-        });
-
 
         adapter.notifyDataSetChanged();
         AlertDialog alertDialog = builder.create();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                flood f = (flood) parent.getAdapter().getItem(position);
+                LatLng currentLatLng = new LatLng(Double.parseDouble(f.getLat()), Double.parseDouble(f.getLang()));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+                alertDialog.dismiss();
+            }
+        });
         alertDialog.show();
     }
+    public int dist(double lat,double lang){
+        double let1 = myLocation[0];
+        double lang1 = myLocation[1];
+        double theta =  lang1 - lang;
+        double dist = Math.sin(deg2rad(let1)) * Math.sin(deg2rad(lat)) + Math.cos(deg2rad(let1)) * Math.cos(deg2rad(lat)) * Math.cos(deg2rad(theta));
+
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+
+        dist = dist * 1.609344;
+
+
+        return (int)dist;
+    }
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    // This function converts radians to decimal degrees
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
+    }
+
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
@@ -218,11 +229,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (location.equals("내 위치")) {
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
-
+            myLocation[0] = lat;
+            myLocation[1] = lang;
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
         }
         mMap.addMarker(markerOptions);
     }
+
+
 
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
@@ -231,8 +245,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        showImageDialog(brandTag);
         //임시,
 
-        if (marker.getTitle().equals("[중부선] 오창")) {
-            showImageDialog();
+        if (marker.getTitle().equals("[경부선] 남청주육교")) {
+            showVideoDialog();
             //showNotification();
 
         } else {
@@ -242,38 +256,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-//    private void showNotification() {
-//        // 알림 빌더
-//        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-//                .setContentTitle("주의")
-//                .setContentText("침수")
-//                .setSmallIcon(R.drawable.a_2);
-//
-//        // 알림 매니저
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//
-//        // SDK 버전이 26 이상인지 확인
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            // 알림 채널 생성
-//            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Test", NotificationManager.IMPORTANCE_HIGH);
-//            notificationChannel.enableVibration(true);
-//            notificationChannel.setDescription("알림");
-//            notificationManager.createNotificationChannel(notificationChannel);
-//        }
-//        // 알림 ID
-//        int NOTIFICATION_ID = 0;
-//        // 알림 표시
-//        notificationManager.notify(NOTIFICATION_ID, notifyBuilder.build());
-//    }
+    private void showNotification() {
+        // 알림 빌더
+        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("주의")
+                .setContentText("[경부선] 현재 남청주육교 인근 도로에 침수가 발생하였습니다.")
+                .setSmallIcon(R.drawable.a_2);
 
-    private void showImageDialog() {
+        // 알림 매니저
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // SDK 버전이 26 이상인지 확인
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            // 알림 채널 생성
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Test", NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setDescription("알림");
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+        // 알림 ID
+        int NOTIFICATION_ID = 0;
+        // 알림 표시
+        notificationManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+    }
+
+    private void showVideoDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.image_dialog, null); // image_dialog_layout.xml 파일을 만들어야 합니다.
+        View dialogView = inflater.inflate(R.layout.video_dialog, null); // image_dialog_layout.xml 파일을 만들어야 합니다.
 
         // 예시: 브랜드 태그에 따라 이미지를 설정
-        ImageView imageView = dialogView.findViewById(R.id.imageView);
-        imageView.setImageResource(R.drawable.a_1);
+        VideoView videoView = dialogView.findViewById(R.id.floodView);
+        videoView.setVideoPath(String.valueOf(R.drawable.roadfloodvideo));
 
         builder.setView(dialogView)
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
@@ -314,31 +328,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-    public class SampleData {
-        private String area;
-        private int distance;
-
-
-        public SampleData(String area, int distance) {
-
-            this.area = area;
-            this.distance = distance;
-        }
-
-//
-//        public String getMovieName()
-//        {
-//            return this.movieName;
-//        }
-//
-//        public String getGrade()
-//        {
-//            return this.grade;
-//        }
-//    }
-
 
 
 

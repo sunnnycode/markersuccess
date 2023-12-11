@@ -11,13 +11,26 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="test"/>
+
+        <TextView
+            android:paddingLeft="10dp"
+            android:id="@+id/km"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+        <TextView
+            android:id="@+id/k"
+            android:text="km"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
         <TextView
             android:id="@+id/lat"
             android:layout_width="wrap_content"
+            android:visibility="gone"
             android:layout_height="match_parent"/>
         <TextView
             android:id="@+id/lang"
             android:layout_width="wrap_content"
+            android:visibility="gone"
             android:layout_height="match_parent"/>
     </LinearLayout>
 </LinearLayout>
