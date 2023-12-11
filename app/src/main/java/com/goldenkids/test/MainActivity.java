@@ -51,6 +51,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     ArrayList<Jung> jungList = Jung.parseJungData(responseBody);
                     for (Jung jung : jungList) {
                         //LatLng currentLatLng = new LatLng(jung.getCoordY(),jung.getCoordX());
-
+                        System.out.println(jung.getCctvUrl());
                         setmaker(jung.getCoordY(), jung.getCoordX(), jung.getCctvName(), jung.getCctvUrl());
 
                     }
@@ -151,7 +152,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         for(String[] f : list){
             adapter.addItem(f[0],f[1],f[2]);
         }
+
         listView.setAdapter(adapter);
+        builder.setView(view)
+                .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 확인 버튼을 눌렀을 때의 동작
+                        dialog.dismiss(); // 다이얼로그 닫기
+                    }
+                });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+
+            }
+        });
+
+
         adapter.notifyDataSetChanged();
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
@@ -178,9 +196,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        MarkerOptions markerOptions = new MarkerOptions();
 
         // API 호출 결과로 받은 좌표에 파란색 마커 추가
-        LatLng apiLatLng = new LatLng(loc_Current.getLatitude(), loc_Current.getLongitude());
+            setmaker(loc_Current.getLatitude(), loc_Current.getLongitude(), "내 위치", "");
 
-        setmaker(loc_Current.getLatitude(), loc_Current.getLongitude(), "내 위치", "");
     }
 
     public void setmaker(double lat, double lang, String location, String cctvUrl) {
@@ -218,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             showImageDialog();
             //showNotification();
 
-        } else if(marker.getTitle().equals("내 위치")) {
+        } else {
 
             showVideoViewDialog(marker.getSnippet());
         }
