@@ -53,7 +53,9 @@ import android.webkit.WebChromeClient;
 
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.MediaController;
+import android.widget.SimpleAdapter;
 import android.widget.VideoView;
 
 import org.json.JSONObject;
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String CHANNEL_ID = "test"; // 원하는 채널 ID로 변경
 
     //setMarker에서 홍수난 쪽에 list.add(new Double[]{lang,lat}); 으로 추가
-    private ArrayList<Double[]> list = new ArrayList<Double[]>();
+    private ArrayList<String[]> list = new ArrayList<String[]>();
     //String 배열 하나 더만들어서 location 그러니까 위치 이름 값 넣기 그걸 listview안에 삽입
 
     // CCTV api 호출
@@ -131,11 +133,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 t.printStackTrace();
             }
         });
-        showNotification();
+//        showNotification();
     }
     @Override
     public void onClick(View v) {
+        showListViewDialog();
+    }
+    public void showListViewDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.list_dialog, null);
+        ListView listView = view.findViewById(R.id.listView);
+        //다이얼로그에 리스트 담기
+        ListViewAdapter adapter;
+        adapter = new ListViewAdapter();
 
+        for(String[] f : list){
+            adapter.addItem(f[0],f[1],f[2]);
+        }
+        listView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
     @Override
     public void onMapReady(final GoogleMap googleMap) {
@@ -176,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // MarkerOptions를 사용하여 파란색 마커 추가
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 //            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
-
+            list.add(new String[]{Double.toString(lat),Double.toString(lang),location});
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 
         } else if (location.equals("내 위치")) {
@@ -199,36 +218,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             showImageDialog();
             //showNotification();
 
-        } else {
+        } else if(marker.getTitle().equals("내 위치")) {
 
             showVideoViewDialog(marker.getSnippet());
         }
         return true;
     }
 
-    private void showNotification() {
-        // 알림 빌더
-        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("주의")
-                .setContentText("침수")
-                .setSmallIcon(R.drawable.a_2);
-
-        // 알림 매니저
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        // SDK 버전이 26 이상인지 확인
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            // 알림 채널 생성
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Test", NotificationManager.IMPORTANCE_HIGH);
-            notificationChannel.enableVibration(true);
-            notificationChannel.setDescription("알림");
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-        // 알림 ID
-        int NOTIFICATION_ID = 0;
-        // 알림 표시
-        notificationManager.notify(NOTIFICATION_ID, notifyBuilder.build());
-    }
+//    private void showNotification() {
+//        // 알림 빌더
+//        NotificationCompat.Builder notifyBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+//                .setContentTitle("주의")
+//                .setContentText("침수")
+//                .setSmallIcon(R.drawable.a_2);
+//
+//        // 알림 매니저
+//        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//
+//        // SDK 버전이 26 이상인지 확인
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            // 알림 채널 생성
+//            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "Test", NotificationManager.IMPORTANCE_HIGH);
+//            notificationChannel.enableVibration(true);
+//            notificationChannel.setDescription("알림");
+//            notificationManager.createNotificationChannel(notificationChannel);
+//        }
+//        // 알림 ID
+//        int NOTIFICATION_ID = 0;
+//        // 알림 표시
+//        notificationManager.notify(NOTIFICATION_ID, notifyBuilder.build());
+//    }
 
     private void showImageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
