@@ -286,11 +286,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.video_dialog, null); // image_dialog_layout.xml 파일을 만들어야 합니다.
-
+        Uri uri = Uri.parse("android.resource://" +getPackageName()+"/"+ R.raw.roadfloodvideo);
         // 예시: 브랜드 태그에 따라 이미지를 설정
         VideoView videoView = dialogView.findViewById(R.id.floodView);
-        videoView.setVideoPath(String.valueOf(R.drawable.roadfloodvideo));
-
+//        videoView.setVideoPath(String.valueOf(R.drawable.roadfloodvideo));
+        videoView.setVideoURI(uri);
         builder.setView(dialogView)
                 .setPositiveButton("확인", new DialogInterface.OnClickListener() {
                     @Override
@@ -299,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         dialog.dismiss(); // 다이얼로그 닫기
                     }
                 });
-
+        videoView.start();
         AlertDialog dialog = builder.create();
         dialog.show();
     }
