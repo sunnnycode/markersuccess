@@ -58,6 +58,7 @@ public class ListViewAdapter extends BaseAdapter {
         lang.setText(listViewItem.getLang());
         km.setText(listViewItem.getKm());
 
+
         return convertView;
     }
 

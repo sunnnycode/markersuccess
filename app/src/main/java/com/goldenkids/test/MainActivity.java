@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 });
 
+
         adapter.notifyDataSetChanged();
         AlertDialog alertDialog = builder.create();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -207,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        MarkerOptions markerOptions = new MarkerOptions();
 
         // API 호출 결과로 받은 좌표에 파란색 마커 추가
-            setmaker(loc_Current.getLatitude(), loc_Current.getLongitude(), "내 위치", "");
+        setmaker(loc_Current.getLatitude(), loc_Current.getLongitude(), "내 위치", "");
 
     }
 
@@ -223,7 +224,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // MarkerOptions를 사용하여 파란색 마커 추가
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 //            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
-            list.add(new String[]{Double.toString(lat),Double.toString(lang),location});
+            dist(lat,lang);
+            list.add(new String[]{Double.toString(lat),Double.toString(lang),location,Integer.toString(dist(lat,lang))});
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 
         } else if (location.equals("내 위치")) {
