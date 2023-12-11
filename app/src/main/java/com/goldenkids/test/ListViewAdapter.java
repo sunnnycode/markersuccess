@@ -13,6 +13,7 @@ public class ListViewAdapter extends BaseAdapter {
     private TextView location;
     private TextView lat;
     private TextView lang;
+    private TextView km;
 
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<flood> floodArrayList = new ArrayList<flood>();
@@ -44,6 +45,7 @@ public class ListViewAdapter extends BaseAdapter {
         location = convertView.findViewById(R.id.location);
         lat =  convertView.findViewById(R.id.lat);
         lang = convertView.findViewById(R.id.lang);
+        km = convertView.findViewById(R.id.km);
 
         flood listViewItem = floodArrayList.get(position);
 
@@ -51,6 +53,8 @@ public class ListViewAdapter extends BaseAdapter {
         location.setText(listViewItem.getLocation());
         lat.setText(listViewItem.getLat());
         lang.setText(listViewItem.getLang());
+        km.setText(listViewItem.getKm());
+
 
         return convertView;
     }
@@ -70,8 +74,8 @@ public class ListViewAdapter extends BaseAdapter {
     }
 
     // 아이템 데이터 추가를 위한 함수.
-    public void addItem(String lat, String lang, String location) {
-        flood item = new flood(lat,lang,location);
+    public void addItem(String lat, String lang, String location,String km) {
+        flood item = new flood(lat,lang,location, km);
 
         floodArrayList.add(item);
     }

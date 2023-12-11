@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ApiService apiService;
     //    private Object BitmapDescriptorFactory;
     private String cctvUrl;
+    private Double myLocation[] = new Double[2];
     private static final String CHANNEL_ID = "test"; // 원하는 채널 ID로 변경
 
     //setMarker에서 홍수난 쪽에 list.add(new Double[]{lang,lat}); 으로 추가
@@ -150,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         adapter = new ListViewAdapter();
 
         for(String[] f : list){
-            adapter.addItem(f[0],f[1],f[2]);
+            adapter.addItem(f[0],f[1],f[2],f[3]);
         }
 
         listView.setAdapter(adapter);
@@ -162,17 +163,45 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         dialog.dismiss(); // 다이얼로그 닫기
                     }
                 });
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
 
-            }
-        });
 
 
         adapter.notifyDataSetChanged();
         AlertDialog alertDialog = builder.create();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                flood f = (flood) parent.getAdapter().getItem(position);
+                LatLng currentLatLng = new LatLng(Double.parseDouble(f.getLat()), Double.parseDouble(f.getLang()));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+                alertDialog.dismiss();
+            }
+        });
         alertDialog.show();
+    }
+    public int dist(double lat,double lang){
+        double let1 = myLocation[0];
+        double lang1 = myLocation[1];
+        double theta =  lang1 - lang;
+        double dist = Math.sin(deg2rad(let1)) * Math.sin(deg2rad(lat)) + Math.cos(deg2rad(let1)) * Math.cos(deg2rad(lat)) * Math.cos(deg2rad(theta));
+
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+
+        dist = dist * 1.609344;
+
+
+        return (int)dist;
+    }
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    // This function converts radians to decimal degrees
+    private static double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
     }
     @Override
     public void onMapReady(final GoogleMap googleMap) {
@@ -196,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        MarkerOptions markerOptions = new MarkerOptions();
 
         // API 호출 결과로 받은 좌표에 파란색 마커 추가
-            setmaker(loc_Current.getLatitude(), loc_Current.getLongitude(), "내 위치", "");
+        setmaker(loc_Current.getLatitude(), loc_Current.getLongitude(), "내 위치", "");
 
     }
 
@@ -212,13 +241,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // MarkerOptions를 사용하여 파란색 마커 추가
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 //            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
-            list.add(new String[]{Double.toString(lat),Double.toString(lang),location});
+            dist(lat,lang);
+            list.add(new String[]{Double.toString(lat),Double.toString(lang),location,Integer.toString(dist(lat,lang))});
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 
         } else if (location.equals("내 위치")) {
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
-
+            myLocation[0] = lat;
+            myLocation[1] = lang;
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
         }
         mMap.addMarker(markerOptions);
